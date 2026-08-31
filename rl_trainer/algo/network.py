@@ -3,6 +3,7 @@ import torch.nn as nn
 import torch.nn.functional as F
 from torch.distributions import Categorical
 
+
 class CNN_encoder(nn.Module):
     def __init__(self):
         super(CNN_encoder, self).__init__()
@@ -12,7 +13,7 @@ class CNN_encoder(nn.Module):
             nn.MaxPool2d(4, 2),
             nn.Conv2d(8, 8, kernel_size=3, padding=1, stride=1),
             nn.ReLU(),
-            nn.MaxPool2d(4,2),
+            nn.MaxPool2d(4, 2),
             nn.Flatten()
         )
 
@@ -21,7 +22,9 @@ class CNN_encoder(nn.Module):
         x = self.net(view_state)
         return x
 
+
 device = 'cpu'
+
 
 class Actor(nn.Module):
     def __init__(self, state_space, action_space, hidden_size=64, cnn=False):
@@ -56,70 +59,124 @@ class Critic(nn.Module):
         value = self.state_value(x)
         return value
 
+
 class CNN_Actor(nn.Module):
-    def __init__(self, state_space, action_space, hidden_size = 64):
+    def __init__(self, state_space, action_space, hidden_size=64):
         super(CNN_Actor, self).__init__()
 
-        # self.conv1 = nn.Conv2d(in_channels = 8, out_channels=32, kernel_size = 4, stride = 2)
-        # self.conv2 = nn.Conv2d(in_channels = 32, out_channels=64, kernel_size = 3, stride = 1)
-        # self.flatten = nn.Flatten()
-        self.net = Net = nn.Sequential(
-            nn.Conv2d(in_channels = 8, out_channels=32, kernel_size = 4, stride = 2),
-            nn.BatchNorm2d(32),
-            nn.ReLU(inplace=True),
-            nn.MaxPool2d(2),
-            nn.Conv2d(in_channels = 32, out_channels=64, kernel_size = 3, stride = 1),
-            nn.BatchNorm2d(64),
-            nn.ReLU(inplace=True),
-            nn.MaxPool2d(kernel_size=2, stride=1),
-            nn.Flatten()
+        self.features = nn.Sequential(
+            nn.Conv2d(1, 32, kernel_size=3),
+            nn.ReLU(),
+            nn.MaxPool2d(2, 2),
+            nn.Conv2d(32, 64, kernel_size=3),
+            nn.ReLU(),
+            nn.MaxPool2d(2, 2),
+            nn.Conv2d(64, 64, kernel_size=3),
+            nn.ReLU()
         )
 
-        self.linear1 = nn.Linear(256, 64)
-        self.linear2 = nn.Linear(64, action_space)
+        self.value_net = nn.Sequential(
+            nn.Flatten(),
+            nn.Linear(64 * 6 * 6, 128),
+            nn.ReLU(),
+            nn.Linear(128, action_space)
+        )
 
     def forward(self, x):
-        x = self.net(x)
-        x = torch.relu(self.linear1(x))
-        action_prob = F.softmax(self.linear2(x), dim = -1)
-        return action_prob
+        x = x.unsqueeze(1)
+        x = self.features(x)
+        x = x.view(x.size(0), -1)
+        value = self.value_net(x)
+
+        # Calculate the softmax probabilities
+        return F.softmax(value, dim=-1)
+    #     # self.conv1 = nn.Conv2d(in_channels = 8, out_channels=32, kernel_size = 4, stride = 2)
+    #     # self.conv2 = nn.Conv2d(in_channels = 32, out_channels=64, kernel_size = 3, stride = 1)
+    #     # self.flatten = nn.Flatten()
+    #     self.net = Net = nn.Sequential(
+    #         nn.Conv2d(in_channels = 1, out_channels=32, kernel_size = 4, stride = 2),
+    #         nn.BatchNorm2d(32),
+    #         nn.ReLU(inplace=True),
+    #         nn.MaxPool2d(2),
+    #         nn.Conv2d(in_channels = 32, out_channels=64, kernel_size = 3, stride = 1),
+    #         nn.BatchNorm2d(64),
+    #         nn.ReLU(inplace=True),
+    #         nn.MaxPool2d(kernel_size=2, stride=1),
+    #         nn.Flatten()
+    #     )
+    #
+    #     self.linear1 = nn.Linear(256, 64)
+    #     self.linear2 = nn.Linear(64, action_space)
+    #
+    # def forward(self, x):
+    #     x = x.unsqueeze(0)
+    #     x = self.net(x)
+    #     x = torch.relu(self.linear1(x))
+    #     action_prob = F.softmax(self.linear2(x), dim=-1)
+    #     return action_prob
+
 
 class CNN_Critic(nn.Module):
-    def __init__(self, state_space, hidden_size = 64):
+    def __init__(self, state_space, hidden_size=64):
         super(CNN_Critic, self).__init__()
 
-        self.net = Net = nn.Sequential(
-            nn.Conv2d(in_channels = 8, out_channels=32, kernel_size = 4, stride = 2),
-            nn.BatchNorm2d(32),
-            nn.ReLU(inplace=True),
-            nn.MaxPool2d(2),
-            nn.Conv2d(in_channels = 32, out_channels=64, kernel_size = 3, stride = 1),
-            nn.BatchNorm2d(64),
-            nn.ReLU(inplace=True),
-            nn.MaxPool2d(kernel_size=2, stride=1),
-            nn.Flatten()
+        self.features = nn.Sequential(
+            nn.Conv2d(1, 32, kernel_size=3),
+            nn.ReLU(),
+            nn.MaxPool2d(2, 2),
+            nn.Conv2d(32, 64, kernel_size=3),
+            nn.ReLU(),
+            nn.MaxPool2d(2, 2),
+            nn.Conv2d(64, 64, kernel_size=3),
+            nn.ReLU()
         )
 
-        self.linear1 = nn.Linear(256, 64)
-        self.linear2 = nn.Linear(64, 1)
+        self.value_net = nn.Sequential(
+            nn.Flatten(),
+            nn.Linear(64 * 6 * 6, 128),
+            nn.ReLU(),
+            nn.Linear(128, 1)
+        )
 
     def forward(self, x):
-        x = self.net(x)
-        x = torch.relu(self.linear1(x))
-        x = self.linear2(x)
-        return x
+        x = x.unsqueeze(1)
+        x = self.features(x)
+        x = x.view(x.size(0), -1)
+        value = self.value_net(x)
 
+        # Calculate the softmax probabilities
+        return value
+    #     self.net = Net = nn.Sequential(
+    #         nn.Conv2d(in_channels=1, out_channels=32, kernel_size=4, stride=2),
+    #         nn.BatchNorm2d(32),
+    #         nn.ReLU(inplace=True),
+    #         nn.MaxPool2d(2),
+    #         nn.Conv2d(in_channels=32, out_channels=64, kernel_size=3, stride=1),
+    #         nn.BatchNorm2d(64),
+    #         nn.ReLU(inplace=True),
+    #         nn.MaxPool2d(kernel_size=2, stride=1),
+    #         nn.Flatten()
+    #     )
+    #
+    #     self.linear1 = nn.Linear(256, 64)
+    #     self.linear2 = nn.Linear(64, 1)
+    #
+    # def forward(self, x):
+    #     x = self.net(x)
+    #     x = torch.relu(self.linear1(x))
+    #     x = self.linear2(x)
+    #     return x
 
 
 class CNN_CategoricalActor(nn.Module):
-    def __init__(self, state_space, action_space, hidden_size = 64):
+    def __init__(self, state_space, action_space, hidden_size=64):
         super(CNN_CategoricalActor, self).__init__()
         self.net = nn.Sequential(
-            nn.Conv2d(in_channels = 8, out_channels=32, kernel_size = 4, stride = 2),
+            nn.Conv2d(in_channels=8, out_channels=32, kernel_size=4, stride=2),
             nn.BatchNorm2d(32),
             nn.ReLU(inplace=True),
             nn.MaxPool2d(2),
-            nn.Conv2d(in_channels = 32, out_channels=32, kernel_size = 3, stride = 1),
+            nn.Conv2d(in_channels=32, out_channels=32, kernel_size=3, stride=1),
             nn.BatchNorm2d(32),
             nn.ReLU(inplace=True),
             nn.MaxPool2d(kernel_size=2, stride=1),
@@ -132,21 +189,22 @@ class CNN_CategoricalActor(nn.Module):
     def forward(self, x):
         x = self.net(x)
         x = F.relu(self.linear1(x))
-        action_prob = F.softmax(self.linear2(x), dim = -1)
+        action_prob = F.softmax(self.linear2(x), dim=-1)
         c = Categorical(action_prob)
         sampled_action = c.sample()
         greedy_action = torch.argmax(action_prob)
         return sampled_action, action_prob, greedy_action
 
+
 class CNN_Critic2(nn.Module):
     def __init__(self, state_space, action_space, hidden_size=64):
         super(CNN_Critic2, self).__init__()
         self.net = nn.Sequential(
-            nn.Conv2d(in_channels = 8, out_channels=32, kernel_size = 4, stride = 2),
+            nn.Conv2d(in_channels=8, out_channels=32, kernel_size=4, stride=2),
             nn.BatchNorm2d(32),
             nn.ReLU(inplace=True),
             nn.MaxPool2d(2),
-            nn.Conv2d(in_channels = 32, out_channels=32, kernel_size = 3, stride = 1),
+            nn.Conv2d(in_channels=32, out_channels=32, kernel_size=3, stride=1),
             nn.BatchNorm2d(32),
             nn.ReLU(inplace=True),
             nn.MaxPool2d(kernel_size=2, stride=1),
@@ -159,8 +217,3 @@ class CNN_Critic2(nn.Module):
         x = self.net(x)
         x = F.relu(self.linear1(x))
         return self.linear2(x)
-
-
-
-
-

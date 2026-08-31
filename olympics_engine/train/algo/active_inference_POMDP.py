@@ -687,7 +687,7 @@ class ActiveInference_POMDP_agent():
 
     def update(self):
 
-        if self.pre_train_vae: # If True: pre-train the VAE
+        if self.pre_train_vae: # If True: pre-is_train the VAE
             msg = "##### Pre-training vae. Starting at {}".format(datetime.datetime.now())
             print(msg)
             self.train_vae()

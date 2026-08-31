@@ -253,8 +253,8 @@ class ActiveInference_agent():
         self.policy_net.optimizer.step()
         self.value_net.optimizer.step()
 
-        self.writer.add_scalar("train/value loss", value_net_loss.mean().item())
-        self.writer.add_scalar('train/VFE', VFE.mean().item())
+        self.writer.add_scalar("is_train/value loss", value_net_loss.mean().item())
+        self.writer.add_scalar('is_train/VFE', VFE.mean().item())
 
     def update(self):
         record_win = deque(maxlen=100)

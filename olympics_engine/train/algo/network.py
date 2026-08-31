@@ -64,7 +64,7 @@ class CNN_Actor(nn.Module):
         # self.conv2 = nn.Conv2d(in_channels = 32, out_channels=64, kernel_size = 3, stride = 1)
         # self.flatten = nn.Flatten()
         self.net = Net = nn.Sequential(
-            nn.Conv2d(in_channels = 8, out_channels=32, kernel_size = 4, stride = 2),
+            nn.Conv2d(in_channels = 1, out_channels=32, kernel_size = 4, stride = 2),
             nn.BatchNorm2d(32),
             nn.ReLU(inplace=True),
             nn.MaxPool2d(2),
@@ -89,7 +89,7 @@ class CNN_Critic(nn.Module):
         super(CNN_Critic, self).__init__()
 
         self.net = Net = nn.Sequential(
-            nn.Conv2d(in_channels = 8, out_channels=32, kernel_size = 4, stride = 2),
+            nn.Conv2d(in_channels = 1, out_channels=32, kernel_size = 4, stride = 2),
             nn.BatchNorm2d(32),
             nn.ReLU(inplace=True),
             nn.MaxPool2d(2),

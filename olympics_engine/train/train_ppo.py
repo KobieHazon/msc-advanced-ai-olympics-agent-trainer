@@ -1,4 +1,4 @@
-# here lies an example of how to train an RL agent on individual subgame
+# here lies an example of how to is_train an RL agent on individual subgame
 
 
 import argparse

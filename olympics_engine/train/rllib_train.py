@@ -2320,7 +2320,7 @@ env = EnvWrapped('')
 # )
 #
 # for i in range(5):
-#     results = trainer.train()
+#     results = trainer.is_train()
 #     print(f"Iter: {i}; avg. reward={results['episode_reward_mean']}")
 #
 # #
@@ -2391,7 +2391,7 @@ env = EnvWrapped('')
 # # (exact match between observation and action value),
 # # we can expect to reach an optimal episode reward of 0.0.
 # for i in range(50):
-#     results = trainer.train()
+#     results = trainer.is_train()
 #     print(f"Iter: {i}; avg. reward={results['episode_reward_mean']}")
 #
 #
