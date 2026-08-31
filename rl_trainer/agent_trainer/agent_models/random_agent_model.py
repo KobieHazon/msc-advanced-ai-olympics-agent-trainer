@@ -24,7 +24,9 @@ class RandomAgentModel(BaseAgentModel):
     def update_result(self, is_win: bool):
         pass
 
-    def get_action(self, state: np.array) -> Tuple[Tuple[float, float], int]:  # TODO: fix to be uniform
+    def get_action(
+        self, state: np.array
+    ) -> Tuple[Tuple[float, float], int]:  # TODO: fix to be uniform
         force = random.uniform(self.force_range[0], self.force_range[1])
         angle = random.uniform(self.angle_range[0], self.angle_range[1])
 

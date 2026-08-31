@@ -16,11 +16,11 @@ NAME_TO_CLASS = {
 class GameEnvironmentFactory:
     def __init__(self, games: Set[str]):
         if not games.issubset(NAME_TO_CLASS.keys()):
-            raise ValueError('Unsupported game registered to factory')
+            raise ValueError("Unsupported game registered to factory")
         self.games = games
 
     def create_game_environment(self, name: str, *args, **kwargs):
         if name not in self.games:
-            raise ValueError('Unsupported game environment')
+            raise ValueError("Unsupported game environment")
         game_environment_class = NAME_TO_CLASS[name]
         return game_environment_class(*args, **kwargs)

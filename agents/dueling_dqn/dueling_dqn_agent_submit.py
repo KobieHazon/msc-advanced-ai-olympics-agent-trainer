@@ -4,20 +4,12 @@
 # action space discrete.
 
 
-import os
-import sys
+import random
 from pathlib import Path
 
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-
-base_dir = str(Path(__file__).resolve().parent.parent)
-sys.path.append(base_dir)
-engine_path = os.path.join(base_dir, "olympics_engine")
-sys.path.append(engine_path)
-
-from olympics_engine.agent import *
 
 
 class DuelingDQN_Net(nn.Module):
@@ -30,21 +22,15 @@ class DuelingDQN_Net(nn.Module):
             nn.Conv2d(32, 64, kernel_size=4, stride=2),
             nn.ReLU(),
             nn.Conv2d(64, 64, kernel_size=3, stride=1),
-            nn.ReLU()
+            nn.ReLU(),
         )
 
         self.value_stream = nn.Sequential(
-            nn.Linear(64, 128),
-            nn.ReLU(),
-            nn.Dropout(dropout),
-            nn.Linear(128, 1)
+            nn.Linear(64, 128), nn.ReLU(), nn.Dropout(dropout), nn.Linear(128, 1)
         )
 
         self.advantage_stream = nn.Sequential(
-            nn.Linear(64, 128),
-            nn.ReLU(),
-            nn.Dropout(dropout),
-            nn.Linear(128, num_actions)
+            nn.Linear(64, 128), nn.ReLU(), nn.Dropout(dropout), nn.Linear(128, num_actions)
         )
 
     def forward(self, x):
@@ -62,23 +48,41 @@ class DuelingDQN_Net(nn.Module):
 
 
 class DuelingDQNAgent:
-
-    def __init__(self, state_space, action_space, max_memory_size, batch_size, gamma, lr,
-                 dropout, exploration_max, exploration_min, exploration_decay, pretrained,
-                 actions_number=2, is_train=True):
+    def __init__(
+        self,
+        state_space,
+        action_space,
+        max_memory_size,
+        batch_size,
+        gamma,
+        lr,
+        dropout,
+        exploration_max,
+        exploration_min,
+        exploration_decay,
+        pretrained,
+        actions_number=2,
+        is_train=True,
+    ):
 
         # Define DQN Layers
         self.state_space = state_space
         self.action_space = action_space
         self.pretrained = pretrained
-        self.device = 'cuda' if torch.cuda.is_available() else 'cpu'
+        self.is_train = is_train
+        self.device = "cuda" if torch.cuda.is_available() else "cpu"
 
         # Dueling DQN Network
         self.dueling_dqn = DuelingDQN_Net(state_space, action_space, dropout).to(self.device)
 
         if self.pretrained:
-            net_path = os.path.dirname(os.path.abspath(__file__)) + f"{os.sep}DuelingDQN.pt"
-            self.dueling_dqn.load_state_dict(torch.load(net_path, map_location=torch.device(self.device)))
+            net_path = Path(__file__).with_name("DuelingDQN.pt")
+            weights = torch.load(
+                net_path,
+                map_location=torch.device(self.device),
+                weights_only=True,
+            )
+            self.dueling_dqn.load_state_dict(weights)
         self.optimizer = torch.optim.Adam(self.dueling_dqn.parameters(), lr=lr)
 
         # Create memory
@@ -105,7 +109,7 @@ class DuelingDQNAgent:
         self.gamma = gamma
         self.l1 = nn.SmoothL1Loss().to(self.device)  # Also known as Huber loss
         self.exploration_max = exploration_max
-        self.exploration_rate = exploration_max
+        self.exploration_rate = exploration_max if is_train else 0.0
         self.exploration_min = exploration_min
         self.exploration_decay = exploration_decay
 
@@ -130,8 +134,7 @@ class DuelingDQNAgent:
         return STATE, ACTION, REWARD, STATE2, DONE
 
     def get_eval_action(self, state):
-        state_tensor = torch.Tensor([state])
-        state_tensor = state_tensor.unsqueeze(1)
+        state_tensor = torch.as_tensor(state, dtype=torch.float32).unsqueeze(0).unsqueeze(0)
         with torch.no_grad():
             # Set the model to evaluation mode to disable learning
             self.dueling_dqn.eval()
@@ -162,7 +165,9 @@ class DuelingDQNAgent:
 
         self.optimizer.zero_grad()
         # Q-Learning target is Q*(S, A) <- r + γ max_a Q(S', a)
-        target = REWARD + torch.mul((self.gamma * self.dueling_dqn(STATE2).max(1).values.unsqueeze(1)), 1 - DONE)
+        target = REWARD + torch.mul(
+            (self.gamma * self.dueling_dqn(STATE2).max(1).values.unsqueeze(1)), 1 - DONE
+        )
         current = self.dueling_dqn(STATE).gather(1, ACTION.long())
 
         loss = self.l1(current, target)

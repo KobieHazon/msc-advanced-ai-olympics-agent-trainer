@@ -1,5 +1,6 @@
 from olympics_engine.generator import create_scenario
 from olympics_engine.scenario import wrestling
+
 from .base_game_environment import BaseGameEnvironment
 
 MAX_REWARD = 100
@@ -7,7 +8,7 @@ MAX_REWARD = 100
 
 class WrestlingGameEnvironment(BaseGameEnvironment):
     def __init__(self):
-        self.game_scenario = create_scenario('wrestling')
+        self.game_scenario = create_scenario("wrestling")
         self.game_env = wrestling(self.game_scenario)
 
     def render(self):

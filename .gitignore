@@ -1,9 +1,15 @@
-# Default ignored files
-.idea*
-*/__pycache__/*
-*/*/__pycache__/*
+.DS_Store
+.idea/
+.pytest_cache/
+.ruff_cache/
+.venv/
+__pycache__/
+*.py[cod]
+*.egg-info/
+build/
+dist/
 logs/
-olympics_engine/__pycache__/
-olympics_engine/scenario/__pycache__/
-olympics_engine/test/.pytest_cache/
-/rl_trainer/models/
+ppo_agent_training_*/
+**/agent_trainer_saves/
+**/models/
+**/events.out.tfevents.*

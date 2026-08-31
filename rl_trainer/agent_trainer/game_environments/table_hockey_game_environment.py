@@ -1,11 +1,12 @@
 from olympics_engine.generator import create_scenario
 from olympics_engine.scenario import table_hockey
+
 from .base_game_environment import BaseGameEnvironment
 
 
 class TableHockeyGameEnvironment(BaseGameEnvironment):
     def __init__(self):
-        self.game_scenario = create_scenario('table-hockey')
+        self.game_scenario = create_scenario("table-hockey")
         self.game_env = table_hockey(self.game_scenario)
 
     def render(self):

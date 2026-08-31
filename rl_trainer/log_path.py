@@ -28,4 +28,3 @@ def save_config(args, save_path):
     file = open(os.path.join(str(save_path), 'config.yaml'), mode='w', encoding='utf-8')
     yaml.dump(vars(args), file)
     file.close()
-

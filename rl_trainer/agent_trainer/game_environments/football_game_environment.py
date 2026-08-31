@@ -1,11 +1,12 @@
 from olympics_engine.generator import create_scenario
 from olympics_engine.scenario import football
+
 from .base_game_environment import BaseGameEnvironment
 
 
 class FootballGameEnvironment(BaseGameEnvironment):
     def __init__(self):
-        self.game_scenario = create_scenario('football')
+        self.game_scenario = create_scenario("football")
         self.game_env = football(self.game_scenario)
 
     def render(self):

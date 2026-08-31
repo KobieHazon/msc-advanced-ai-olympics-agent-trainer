@@ -1,2 +1,6 @@
-class TrainEpisode:
-    def __init__(self, train_env: GameEnvironment, agent_models: List[AgentModel], is_render: bool):  # TODO: complete scenario typing
+"""Historical placeholder superseded by ``AgentTrainer.run_episode``.
+
+The recovered snapshot contained only an unfinished class declaration here. The
+working episode loop lives in ``agent_trainer.py``; this module remains as a
+record of the abandoned extraction without breaking repository-wide parsing.
+"""

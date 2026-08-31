@@ -1,104 +1,93 @@
-<img src="imgs/Jidi%20logo.png" width='300px'>  <img src="imgs/ijcai-logo.png" width='300px'>
-# Competition_IJCAI2023
+# AI Olympics Agent Trainer
 
-source code for IJCAI 2023 Competition
+A 2023 CS MSc Advanced AI team project for training and submitting agents to the IJCAI AI Olympics integrated environment. The recovered work combines a reusable PPO trainer, DQN and dueling-DQN experiments, a visual game classifier, game-specific policy dispatch, and final trained submission weights.
 
+## What Is Included
 
-## Multi-Agent Game Evaluation Platform --- Jidi (及第)
-Jidi supports online evaluation service for various games/simulators/environments/testbeds. Website: [www.jidiai.cn](www.jidiai.cn).
+- A configurable PPO-versus-random trainer for running, football, wrestling, and table hockey
+- DQN and dueling-DQN agent implementations and a final running-agent checkpoint
+- A convolutional game classifier that dispatches observations to game-specific PPO or random policies
+- Final classifier, football actor, and running actor weights used by the recovered submission
+- The supplied AI Olympics engine, wrappers, assets, and reference trainers needed to run the project
+- One curated latest PPO actor/critic checkpoint from the recovered 9,900-episode run
 
-A tutorial on Jidi: [Tutorial](https://github.com/jidiai/ai_lib/blob/master/assets/Jidi%20tutorial.pdf)
+## Requirements
 
+- Python 3.10
+- [`uv`](https://docs.astral.sh/uv/)
+- A CPU is sufficient for tests and inference; CUDA is optional for training
 
-## Environment
+## Setup
 
-<img src="imgs/AI-Olympics_render.gif" width=600>
-
-
-Check details in Jidi Competition [IJCAI 2023 AI Qlympics Competition](http://www.jidiai.cn/compete_detail?compete=34) 
-
-
-### Olympics-Integrated
-<b>Tags</b>: Partial Observation; Continuous Action Space; Continuous Observation Space, Multi-Tasks
-
-<b>Introduction: </b>Agents participate in the Olympic Games. In this series of competitions, two agents participate in **Six** Olympics games, including **running, football, table hockey, wrestling, curling and billiard**.
-
-<b>Environment Rules:</b> 
-1. This game has two sides and both sides control an elastic ball agent with the same mass and radius.
-2. Agents can collide with each other or walls, but they might lose a certain speed. The agent has its own energy, and the energy consumed in each step is directly proportional to the applied driving force and displacement.
-3. The energy of the agent recovers at a fixed rate at the same time. If the energy decays to zero, the agent will be tired, resulting in failure to apply force.
-4. The whole game contains the subgames below. In running, the goal is to reach the end as fast as possible. In football, agent needs to hit the ball through collision into opponent's goal and defend his own goal. In table-hockey, agents share the same objective as in football except that they can only move freely in our own half court. In wrestling, agent who knock others out of bounds while keeping staying in bounds wins the game.
-5. The game ends when all subgames are finished.
-
-
-<b>Action Space: </b>Continuous, a matrix with shape 2*1, representing applied force and steering angle respectively.
-
-<b>Observation: </b>A dictionary with keys 'obs' and 'controlled_player_index'. The value of 'obs' contains a 2D matrix with shape of 40x40 and other game-releated infomation. The 2D matrix records the view of agent along his current direction. Agent can see walls, marking lines, opponents and other game object within the vision area. The value of 'controlled_player_index' is the player id of the game. The side information includes energy left and a game-switching flags.
-
-<b>Reward: </b>Each team obtains a +1 reward when winning a subgame, and 0 reward when losing a subgame.
-
-<b>Environment ends condition: </b>The game ends when all subgames are finished.
-
-<b>Registration: </b>Go to (http://www.jidiai.cn/compete_detail?compete=17 and http://www.jidiai.cn/compete_detail?compete=18).
-
----
-## Navigation
-
-```
-|-- Competition_IJCAI2023                   // https://github.com/jidiai/Competition_IJCAI2023.git 
-	|-- agents                          // Agents that act in the environment
-	|	|-- random                  // A random agent demo
-	|	|	|-- submission.py   // A ready-to-submit random agent file
-	|-- env		                    // scripts for the environment
-	|	|-- config.py               // environment configuration file
-	|	|-- olympics_integrated.py  // The environment wrapper	
-	|-- olympics_engine		    // Game engine (https://github.com/jidiai/olympics_engine)
-	|-- rl_trainer                      // A training example of some of the sub-scenarios (for reference only)
-	|-- utils               
-	|-- run_log.py		            // run the game with provided agents (same way we evaluate your submission in the backend server)
+```bash
+git clone https://github.com/KobieHazon/msc-advanced-ai-olympics-agent-trainer.git
+cd msc-advanced-ai-olympics-agent-trainer
+uv sync --dev
 ```
 
+## Run
 
+Run the final classifier agent against the supplied random agent:
 
----
-## Dependency
+```bash
+SDL_VIDEODRIVER=dummy uv run python run_log.py \
+  --my_ai game_classifier \
+  --opponent random
+```
 
->conda create -n olympics python=3.8.5
+Start a short PPO training run:
 
->conda activate olympics
+```bash
+SDL_VIDEODRIVER=dummy uv run python -m rl_trainer.agent_trainer.agent_trainer \
+  --game_name running \
+  --train_model ppo \
+  --enemy_model random \
+  --max_episodes 10 \
+  --episode_max_len 500
+```
 
->pip install -r requirements.txt
+Training is stochastic and expensive. The command demonstrates the canonical recovered entry point; it does not reproduce the original long run in a few minutes.
 
----
+## Validate
 
-## Run a game
+```bash
+SDL_VIDEODRIVER=dummy uv run pytest
+uv run ruff check .
+uv run ruff format --check .
+```
 
->python olympics_engine/main.py
+The tests load the recovered model weights, exercise both final submission controllers, validate the trainer factories and argument handling, and smoke-test an environment reset and step without rendering a window.
 
----
+## Provenance
 
-## How to test submission
+| Material | Classification | Notes |
+| --- | --- | --- |
+| `env/`, `olympics_engine/`, `utils/`, `agents/random/`, assets, and original documentation | Supplied framework | Preserved from the `jidiai/Competition_IJCAI2023` framework in the first commit. |
+| `agents/dueling_dqn/` and `agents/game_classifier/` | Coauthored solution | Final submission agents and trained weights recovered from the team snapshot. |
+| `rl_trainer/agent_trainer/` | Coauthored solution | Newest recovered reusable trainer and model/environment adapters. |
+| `rl_trainer/rl-algo-competition/` and modified reference-trainer files | Coauthored experiments | Earlier team experiments retained for completeness; they are not the canonical run path. |
+| `artifacts/ppo-vs-random-episode-9900/` | Curated generated result | Latest actor/critic pair selected from hundreds of intermediate checkpoints. |
+| `docs/upstream-framework-readme.md` and `LICENSE` | Supplied documentation | Original framework README and MIT license. |
 
-You can locally test your submission. At Jidi platform, we evaluate your submission as same as *run_log.py*
+The July 2, 2023 snapshot is the newest recovered copy. It was compared by content with the June 20 competition package and the May `train` and `Project` directories. The older copies contain no later unique source. An older nested classifier ZIP was extracted and compared; its classifier weights match, but its submission source predates the retained folder.
 
-For example,
+Generated virtual environments, caches, local editor files, evaluation logs, TensorBoard event files, duplicate archives, and roughly 850 MB of superseded checkpoints are intentionally omitted. They are not source and are not required by the documented run path.
 
->python run_log.py --my_ai "random" --opponent "random"
+## Authors
 
-in which you are controlling agent 1 (light red)
+- Kobie Hazon
+- Ron Ben Shimol
+- Shahar Bend
 
----
+The recovered files do not establish a reliable per-line division of work, so the team-authored material is credited jointly.
 
-## Ready to submit
+## Known Limitations
 
-Random policy --> *agents/random/submission.py*
+- The full historical training run was not reproduced; validation covers inference, model loading, factories, and a short environment smoke path.
+- `agent_trainer.py` is the newest canonical trainer. `agent_trainer_run.py` is retained as an earlier incomplete experiment.
+- The historical Ray/RLlib experiment imports an obsolete Ray API and is preserved as source evidence, not advertised as a supported entry point.
+- PyTorch checkpoints should only be loaded from trusted sources. The maintained loaders request weights-only deserialization.
 
+## Rights
 
-## Frequently asked question:
-- Q: Any requirement on the submitted agents?
-- A: The submitted agent will be run on CPU-only machine and the decision time needs to be within 1 second 
-and takes memory no more than 500M. The submitted file must contain a `submission.py` script that has 
-a `my_controller(*)` function in it (See the random agent demo). We will call this function to generate action in our evaluation backend.
-
-- Q: Any requirement on agent training?
-- A: We add no restriction to agent training. You can solve the tasks with any method you like, e.g. rule-based, heuristic, RL, etc.
+The supplied AI Olympics framework retains its MIT license and copyright notice in `LICENSE`. See `NOTICE.md` for the status of the team-authored coursework additions.

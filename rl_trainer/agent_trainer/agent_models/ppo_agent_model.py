@@ -9,22 +9,24 @@ from torch.distributions import Categorical
 from torch.utils.data import BatchSampler, SubsetRandomSampler
 from torch.utils.tensorboard import SummaryWriter
 
+from ...algo.network import CNN_Actor, CNN_Critic
 from .base_agent_model import BaseAgentModel, device
-from ...algo.network import Actor, Critic, CNN_Actor, CNN_Critic
 
 
 class PPOAgentModel(BaseAgentModel):
     def __init__(self):
         super().__init__()
-        self._actor_nn = CNN_Actor(self.STATE_SPACE, self.ACTION_SPACE)
-        self._critic_nn = CNN_Critic(self.STATE_SPACE)
+        self._actor_nn = CNN_Actor(self.STATE_SPACE, self.ACTION_SPACE).to(device)
+        self._critic_nn = CNN_Critic(self.STATE_SPACE).to(device)
 
         self.training_step = 0
 
         self.actor_optimizer = optim.Adam(self._actor_nn.parameters(), lr=self.LR)
         self.critic_net_optimizer = optim.Adam(self._critic_nn.parameters(), lr=self.LR)
 
-        self.writer = SummaryWriter("ppo_agent_training_{}".format(datetime.now().strftime("%Y-%m-%d_%H-%M-%S")))
+        self.writer = SummaryWriter(
+            "ppo_agent_training_{}".format(datetime.now().strftime("%Y-%m-%d_%H-%M-%S"))
+        )
         self.IO = True
 
     @property
@@ -43,13 +45,20 @@ class PPOAgentModel(BaseAgentModel):
         states = np.array([t.state.numpy() for t in self.transitions])
         state = torch.tensor(states, dtype=torch.float).to(device)
         # state = torch.tensor(np.array([t.state for t in self.transitions]), dtype=torch.float).to(device)
-        action = torch.tensor(np.array([t.action for t in self.transitions]), dtype=torch.long).view(-1, 1).to(device)
+        action = (
+            torch.tensor(np.array([t.action for t in self.transitions]), dtype=torch.long)
+            .view(-1, 1)
+            .to(device)
+        )
         reward = [t.reward for t in self.transitions]
         # update: don't need next_state
         # reward = torch.tensor([t.reward for t in self.buffer], dtype=torch.float).view(-1, 1)
         # next_state = torch.tensor([t.next_state for t in self.buffer], dtype=torch.float)
-        old_action_log_prob = torch.tensor(np.array([t.a_log_prob for t in self.transitions]), dtype=torch.float).view(-1, 1).to(
-            device)
+        old_action_log_prob = (
+            torch.tensor(np.array([t.a_log_prob for t in self.transitions]), dtype=torch.float)
+            .view(-1, 1)
+            .to(device)
+        )
 
         R = 0
         Gt = []
@@ -58,8 +67,10 @@ class PPOAgentModel(BaseAgentModel):
             Gt.insert(0, R)
         Gt = torch.tensor(Gt, dtype=torch.float).to(device)
         # print("The agent is updateing....")
-        for i in range(self.PPO_UPDATE_TIME):
-            for index in BatchSampler(SubsetRandomSampler(range(len(self.transitions))), self.BATCH_SIZE, False):
+        for _i in range(self.PPO_UPDATE_TIME):
+            for index in BatchSampler(
+                SubsetRandomSampler(range(len(self.transitions))), self.BATCH_SIZE, False
+            ):
                 # if self.training_step % 1000 == 0:
                 #     print('I_ep {} ，is_train {} times'.format(i_ep, self.training_step))
                 # with torch.no_grad():
@@ -68,9 +79,11 @@ class PPOAgentModel(BaseAgentModel):
                 delta = Gt_index - V
                 advantage = delta.detach()
                 # epoch iteration, PPO core!!!
-                action_prob = self._actor_nn(state[index].squeeze(1)).gather(1, action[index])  # new policy
+                action_prob = self._actor_nn(state[index].squeeze(1)).gather(
+                    1, action[index]
+                )  # new policy
 
-                ratio = (action_prob / old_action_log_prob[index])
+                ratio = action_prob / old_action_log_prob[index]
                 surr1 = ratio * advantage
                 surr2 = torch.clamp(ratio, 1 - self.CLIP_PARAM, 1 + self.CLIP_PARAM) * advantage
 
@@ -92,8 +105,12 @@ class PPOAgentModel(BaseAgentModel):
                 self.training_step += 1
 
                 if self.IO:
-                    self.writer.add_scalar('loss/policy loss', action_loss.item(), self.training_step)
-                    self.writer.add_scalar('loss/critic loss', value_loss.item(), self.training_step)
+                    self.writer.add_scalar(
+                        "loss/policy loss", action_loss.item(), self.training_step
+                    )
+                    self.writer.add_scalar(
+                        "loss/critic loss", value_loss.item(), self.training_step
+                    )
 
         del self.transitions[:]  # clear experience
 

@@ -1,5 +1,4 @@
 from abc import ABCMeta, abstractmethod
-from typing import List
 
 
 class BaseGameEnvironment(metaclass=ABCMeta):
@@ -12,5 +11,11 @@ class BaseGameEnvironment(metaclass=ABCMeta):
         pass
 
     @abstractmethod
-    def get_agent_data(self, agent_index: int):  # look at create_scenario to understand what kind of agent data exists
+    def get_agent_data(
+        self, agent_index: int
+    ):  # look at create_scenario to understand what kind of agent data exists
         pass
+
+    def get_shaped_reward(self, step_reward: int, is_done: bool) -> int:
+        """Default terminal-only reward used by environments without shaping."""
+        return step_reward if is_done else 0
