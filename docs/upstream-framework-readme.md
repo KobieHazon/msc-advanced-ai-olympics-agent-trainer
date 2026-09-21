@@ -1,4 +1,4 @@
-<img src="imgs/Jidi%20logo.png" width='300px'>  <img src="imgs/ijcai-logo.png" width='300px'>
+<img src="images/Jidi%20logo.png" width='300px'>  <img src="images/ijcai-logo.png" width='300px'>
 # Competition_IJCAI2023
 
 source code for IJCAI 2023 Competition
@@ -12,7 +12,7 @@ A tutorial on Jidi: [Tutorial](https://github.com/jidiai/ai_lib/blob/master/asse
 
 ## Environment
 
-<img src="imgs/AI-Olympics_render.gif" width=600>
+<img src="images/AI-Olympics_render.gif" width=600>
 
 
 Check details in Jidi Competition [IJCAI 2023 AI Qlympics Competition](http://www.jidiai.cn/compete_detail?compete=34) 
