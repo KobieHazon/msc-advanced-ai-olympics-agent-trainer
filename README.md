@@ -9,7 +9,7 @@ A 2023 CS MSc Advanced AI team project for training and submitting agents to the
 | `rl_trainer/agent_trainer/` | Coauthored solution | Newest reusable trainer and model/environment adapters. |
 | `rl_trainer/rl-algo-competition/` and modified reference-trainer files | Coauthored experiments | Earlier team experiments retained for completeness; they are not the canonical run path. |
 | `artifacts/ppo-vs-random-episode-9900/` | Curated generated result | Latest actor/critic pair selected from hundreds of intermediate checkpoints. |
-| `docs/upstream-framework-readme.md` and `LICENSE` | Supplied documentation | Original framework README and MIT license. |
+| [`docs/upstream-framework-readme.md`](docs/upstream-framework-readme.md) | Supplied documentation | Original framework README, copyright notice, and MIT license. |
 
 ## What Is Included
 
@@ -79,7 +79,3 @@ The tests load the model weights, exercise both final submission controllers, va
 - `agent_trainer.py` is the newest canonical trainer. `agent_trainer_run.py` is retained as an earlier incomplete experiment.
 - The historical Ray/RLlib experiment imports an obsolete Ray API and is preserved as source evidence, not advertised as a supported entry point.
 - PyTorch checkpoints should only be loaded from trusted sources. The maintained loaders request weights-only deserialization.
-
-## Rights
-
-The supplied AI Olympics framework retains its MIT license and copyright notice in `LICENSE`. See `NOTICE.md` for the status of the team-authored coursework additions.
