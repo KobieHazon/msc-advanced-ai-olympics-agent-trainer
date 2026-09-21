@@ -2,5 +2,4 @@
 
 Train a PPO agent:
 
->python main.py --algo=ppo 
-
+>python main.py --algo=ppo

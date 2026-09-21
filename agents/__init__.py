@@ -1,1 +1,1 @@
-"""Recovered team and supplied AI Olympics agents."""
+"""team and supplied AI Olympics agents."""
