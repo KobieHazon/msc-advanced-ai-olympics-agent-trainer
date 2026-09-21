@@ -2,6 +2,19 @@
 
 A 2023 CS MSc Advanced AI team project for training and submitting agents to the IJCAI AI Olympics integrated environment. The recovered work combines a reusable PPO trainer, DQN and dueling-DQN experiments, a visual game classifier, game-specific policy dispatch, and final trained submission weights.
 
+| Material | Classification | Notes |
+| --- | --- | --- |
+| `env/`, `olympics_engine/`, `utils/`, `agents/random/`, assets, and original documentation | Supplied framework | Preserved from the `jidiai/Competition_IJCAI2023` framework in the first commit. |
+| `agents/dueling_dqn/` and `agents/game_classifier/` | Coauthored solution | Final submission agents and trained weights recovered from the team snapshot. |
+| `rl_trainer/agent_trainer/` | Coauthored solution | Newest recovered reusable trainer and model/environment adapters. |
+| `rl_trainer/rl-algo-competition/` and modified reference-trainer files | Coauthored experiments | Earlier team experiments retained for completeness; they are not the canonical run path. |
+| `artifacts/ppo-vs-random-episode-9900/` | Curated generated result | Latest actor/critic pair selected from hundreds of intermediate checkpoints. |
+| `docs/upstream-framework-readme.md` and `LICENSE` | Supplied documentation | Original framework README and MIT license. |
+
+The July 2, 2023 snapshot is the newest recovered copy. It was compared by content with the June 20 competition package and the May `train` and `Project` directories. The older copies contain no later unique source. An older nested classifier ZIP was extracted and compared; its classifier weights match, but its submission source predates the retained folder.
+
+Generated virtual environments, caches, local editor files, evaluation logs, TensorBoard event files, duplicate archives, and roughly 850 MB of superseded checkpoints are intentionally omitted. They are not source and are not required by the documented run path.
+
 ## What Is Included
 
 - A configurable PPO-versus-random trainer for running, football, wrestling, and table hockey
@@ -57,21 +70,6 @@ uv run ruff format --check .
 ```
 
 The tests load the recovered model weights, exercise both final submission controllers, validate the trainer factories and argument handling, and smoke-test an environment reset and step without rendering a window.
-
-## Provenance
-
-| Material | Classification | Notes |
-| --- | --- | --- |
-| `env/`, `olympics_engine/`, `utils/`, `agents/random/`, assets, and original documentation | Supplied framework | Preserved from the `jidiai/Competition_IJCAI2023` framework in the first commit. |
-| `agents/dueling_dqn/` and `agents/game_classifier/` | Coauthored solution | Final submission agents and trained weights recovered from the team snapshot. |
-| `rl_trainer/agent_trainer/` | Coauthored solution | Newest recovered reusable trainer and model/environment adapters. |
-| `rl_trainer/rl-algo-competition/` and modified reference-trainer files | Coauthored experiments | Earlier team experiments retained for completeness; they are not the canonical run path. |
-| `artifacts/ppo-vs-random-episode-9900/` | Curated generated result | Latest actor/critic pair selected from hundreds of intermediate checkpoints. |
-| `docs/upstream-framework-readme.md` and `LICENSE` | Supplied documentation | Original framework README and MIT license. |
-
-The July 2, 2023 snapshot is the newest recovered copy. It was compared by content with the June 20 competition package and the May `train` and `Project` directories. The older copies contain no later unique source. An older nested classifier ZIP was extracted and compared; its classifier weights match, but its submission source predates the retained folder.
-
-Generated virtual environments, caches, local editor files, evaluation logs, TensorBoard event files, duplicate archives, and roughly 850 MB of superseded checkpoints are intentionally omitted. They are not source and are not required by the documented run path.
 
 ## Authors
 
